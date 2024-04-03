@@ -2,6 +2,7 @@ import { readdir, mkdir } from "node:fs/promises";
 import type { VideoProp, convert } from "./types";
 import ffmpeg from "fluent-ffmpeg";
 import colors from "colors";
+import cliProgress from "cli-progress";
 import os from "os";
 import { which } from "bun";
 
@@ -12,8 +13,8 @@ if (!ffpath) {
 }
 ffmpeg.setFfmpegPath(ffpath);
 
-const currentOS = os.platform();
-const path = `${process.cwd()}/test`;
+const curOS = os.platform();
+const path = `${process.cwd()}`;
 
 const outputPath = `${path}/output`;
 
@@ -27,11 +28,21 @@ const bitrates = (dur: string) => {
     };
     return mbs[dur] || mbs["45s"];
 };
-const cfg = {
+const systemsCFG = {
     darwin: {
         encoder: "hevc_videotoolbox",
     },
 };
+
+if (!curOS || !systemsCFG[curOS as keyof typeof systemsCFG]) {
+    console.log("unknown os");
+    process.exit(1);
+}
+const clearLastLines = (count: number) => {
+    process.stdout.moveCursor(0, -count);
+    process.stdout.clearScreenDown();
+};
+const cfg = systemsCFG[curOS as keyof typeof systemsCFG];
 const app = {
     async run() {
         const startTime = new Date().getTime();
@@ -113,20 +124,33 @@ const app = {
     },
     async convertFiles(titles: VideoProp) {
         for (const title of Object.values(titles)) {
+            if (!title.sound) return;
             for (const e of Object.values(title.resize)) {
                 const [resize, titleName, id, btn, loc, duration, size] =
                     e.args;
                 const titleFolder = `${outputPath}/cream/${titleName}_${id}`;
                 await this.mkdir(titleFolder);
                 const startTime = new Date().getTime();
+                const bar = new cliProgress.SingleBar(
+                    {
+                        format: "{bar} " + "| {percentage}% " + e.name,
+                    },
+                    cliProgress.Presets.shades_classic
+                );
+                bar.start(100, 0);
+                const update = (progress: any) => {
+                    bar.update(Math.round(progress.percent));
+                };
                 await this.convert({
                     videoPath: e.path,
                     audioPath: title.sound,
                     bitrate: bitrates(duration),
                     output: `${titleFolder}/${e.name}.mp4`,
                     duration: parseInt(duration),
+                    update,
                 });
-
+                bar.stop();
+                clearLastLines(1);
                 const elapsed = (
                     (new Date().getTime() - startTime) /
                     1000
@@ -139,6 +163,7 @@ const app = {
     async applovinConvert(titles: VideoProp) {
         const resizes = ["1920x1080", "1080x1920"];
         for (const title of Object.values(titles)) {
+            if (!title.sound) return;
             for (const e of Object.values(title.resize)) {
                 const [resize, titleName, id, btn, loc, duration, size] =
                     e.args;
@@ -146,13 +171,26 @@ const app = {
                     const titleFolder = `${outputPath}/applovin/${titleName}_${id}`;
                     await this.mkdir(titleFolder);
                     const startTime = new Date().getTime();
+                    const bar = new cliProgress.SingleBar(
+                        {
+                            format: "{bar} " + "| {percentage}% " + e.name,
+                        },
+                        cliProgress.Presets.shades_classic
+                    );
+                    bar.start(100, 0);
+                    const update = (progress: any) => {
+                        bar.update(Math.round(progress.percent));
+                    };
                     await this.convert({
                         videoPath: e.path,
                         audioPath: title.sound,
                         bitrate: bitrates(duration) - 10,
                         output: `${titleFolder}/${e.name}.mp4`,
                         duration: parseInt(duration),
+                        update,
                     });
+                    bar.stop();
+                    clearLastLines(1);
                     console.log(
                         `Applovin variant for ${e.name} created within ${(
                             (new Date().getTime() - startTime) /
@@ -165,11 +203,12 @@ const app = {
         return true;
     },
     async convert(data: convert) {
-        const { videoPath, audioPath, output, bitrate, duration } = data;
+        const { videoPath, audioPath, output, bitrate, duration, update } =
+            data;
         return new Promise((res) => {
             const video = ffmpeg().input(videoPath);
-            audioPath && video.input(audioPath);
-            video.videoCodec("hevc_videotoolbox");
+            video.input(audioPath);
+            video.videoCodec(cfg.encoder || "h265");
             video.outputOptions([
                 "-c:a aac",
 
@@ -187,7 +226,7 @@ const app = {
             video.on("error", () => res(false));
             video.on("end", () => res(true));
             video.on("progress", function (progress) {
-                console.log("Processing: " + progress.percent + "% done");
+                update(progress);
             });
             video.saveToFile(output);
         });

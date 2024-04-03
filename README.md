@@ -1,4 +1,4 @@
-# scr2
+# FFJam
 
 To install dependencies:
 

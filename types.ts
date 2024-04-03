@@ -14,10 +14,11 @@ interface VideoResizeOpts {
 
 type convert = {
     videoPath: string;
-    audioPath?: string;
+    audioPath: string;
     output: string;
     bitrate: number;
     duration: number;
+    update: Function;
 };
 
 export type { VideoResizeOpts, VideoProp, convert };
