@@ -12,10 +12,9 @@ if (!ffpath) {
     process.exit(1);
 }
 ffmpeg.setFfmpegPath(ffpath);
-console.log(ffpath);
 
 const curOS = os.platform();
-const path = `${process.cwd()}/test`;
+const path = `${process.cwd()}`;
 
 const outputPath = `${path}/output`;
 
@@ -34,7 +33,7 @@ const systemsCFG = {
         encoder: "hevc_videotoolbox",
     },
     win32:{
-        encoder: "libx264",
+        encoder: "hevc_nvenc",
     }
 };
 
@@ -231,7 +230,7 @@ const app = {
             video.on("end", () => res(true));
             video.on("progress", function (progress) {
                 update(progress);
-            });
+            });         
             video.saveToFile(output);
         });
     },
