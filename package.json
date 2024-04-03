@@ -1,0 +1,17 @@
+{
+  "name": "scr2",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "^1.0.10",
+    "@types/fluent-ffmpeg": "^2.1.24"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/node": "^20.11.30",
+    "colors": "^1.4.0",
+    "fluent-ffmpeg": "^2.1.2"
+  }
+}
