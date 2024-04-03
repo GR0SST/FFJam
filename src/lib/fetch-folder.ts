@@ -76,11 +76,11 @@ export const fetchFolder = async (path: string): Promise<VideoProp> => {
         titles[id].sound = `${path}/${audio}`;
         audioList.push(`Appended ${audio} to ${title}_${id}`);
       } else {
-        consola.warn(`WARNING: Creative for ${audio} not found`);
+        consola.warn(`Creative for ${audio} not found`);
       }
     }
 
-    consola.start(centerAlign('AUDIO', 35));
+    consola.log(centerAlign('AUDIO', 35));
     consola.box(audioList.join('\n'));
 
     Object.values(titles).forEach((item) => {
