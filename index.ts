@@ -12,9 +12,10 @@ if (!ffpath) {
     process.exit(1);
 }
 ffmpeg.setFfmpegPath(ffpath);
+console.log(ffpath);
 
 const curOS = os.platform();
-const path = `${process.cwd()}`;
+const path = `${process.cwd()}/test`;
 
 const outputPath = `${path}/output`;
 
@@ -32,6 +33,9 @@ const systemsCFG = {
     darwin: {
         encoder: "hevc_videotoolbox",
     },
+    win32:{
+        encoder: "libx264",
+    }
 };
 
 if (!curOS || !systemsCFG[curOS as keyof typeof systemsCFG]) {
@@ -208,7 +212,7 @@ const app = {
         return new Promise((res) => {
             const video = ffmpeg().input(videoPath);
             video.input(audioPath);
-            video.videoCodec(cfg.encoder || "h265");
+            video.videoCodec(cfg.encoder);
             video.outputOptions([
                 "-c:a aac",
 
