@@ -1,10 +1,11 @@
 import { readdir, mkdir } from "node:fs/promises";
+import { renameSync } from "node:fs";
 import type { VideoProp, convert } from "./types";
 import ffmpeg from "fluent-ffmpeg";
 import colors from "colors";
 import cliProgress from "cli-progress";
 import os from "os";
-import { which } from "bun";
+import { which, file } from "bun";
 
 const ffpath = which("ffmpeg");
 if (!ffpath) {
@@ -32,9 +33,9 @@ const systemsCFG = {
     darwin: {
         encoder: "hevc_videotoolbox",
     },
-    win32:{
+    win32: {
         encoder: "hevc_nvenc",
-    }
+    },
 };
 
 if (!curOS || !systemsCFG[curOS as keyof typeof systemsCFG]) {
@@ -127,7 +128,6 @@ const app = {
     },
     async convertFiles(titles: VideoProp) {
         for (const title of Object.values(titles)) {
-            if (!title.sound) return;
             for (const e of Object.values(title.resize)) {
                 const [resize, titleName, id, btn, loc, duration, size] =
                     e.args;
@@ -144,16 +144,24 @@ const app = {
                 const update = (progress: any) => {
                     bar.update(Math.round(progress.percent));
                 };
+                const output = `${titleFolder}/${e.name}.mp4`;
                 await this.convert({
                     videoPath: e.path,
                     audioPath: title.sound,
                     bitrate: bitrates(duration),
-                    output: `${titleFolder}/${e.name}.mp4`,
+                    output: output,
                     duration: parseInt(duration),
                     update,
                 });
                 bar.stop();
                 clearLastLines(1);
+                const newFileSize = Math.floor(file(output).size / 1000000);
+
+                renameSync(
+                    output,
+                    `${titleFolder}/${resize}_${titleName}_${id}_${btn}_${loc}_${duration}_${newFileSize}mb.mp4`
+                );
+
                 const elapsed = (
                     (new Date().getTime() - startTime) /
                     1000
@@ -166,7 +174,6 @@ const app = {
     async applovinConvert(titles: VideoProp) {
         const resizes = ["1920x1080", "1080x1920"];
         for (const title of Object.values(titles)) {
-            if (!title.sound) return;
             for (const e of Object.values(title.resize)) {
                 const [resize, titleName, id, btn, loc, duration, size] =
                     e.args;
@@ -184,16 +191,24 @@ const app = {
                     const update = (progress: any) => {
                         bar.update(Math.round(progress.percent));
                     };
+                    const output = `${titleFolder}/${e.name}.mp4`;
                     await this.convert({
                         videoPath: e.path,
                         audioPath: title.sound,
                         bitrate: bitrates(duration) - 10,
-                        output: `${titleFolder}/${e.name}.mp4`,
+                        output,
                         duration: parseInt(duration),
                         update,
                     });
                     bar.stop();
                     clearLastLines(1);
+
+                    const newFileSize = Math.floor(file(output).size / 1000000);
+
+                    renameSync(
+                        output,
+                        `${titleFolder}/${resize}_${titleName}_${id}_${btn}_${loc}_${duration}_${newFileSize}mb.mp4`
+                    );
                     console.log(
                         `Applovin variant for ${e.name} created within ${(
                             (new Date().getTime() - startTime) /
@@ -210,9 +225,9 @@ const app = {
             data;
         return new Promise((res) => {
             const video = ffmpeg().input(videoPath);
-            video.input(audioPath);
+            audioPath && video.input(audioPath);
             video.videoCodec(cfg.encoder);
-            video.outputOptions([
+            const options = [
                 "-c:a aac",
 
                 "-vtag hvc1",
@@ -222,15 +237,15 @@ const app = {
                 `-bufsize ${bitrate}k`,
                 `-b:v ${bitrate}k`,
                 "-y",
-                "-map 1:a:0",
-                "-map 0:v:0",
-            ]);
+            ];
+            audioPath && options.push("-map 1:a:0", "-map 0:v:0");
+            video.outputOptions(options);
             video.duration(duration);
             video.on("error", () => res(false));
             video.on("end", () => res(true));
             video.on("progress", function (progress) {
                 update(progress);
-            });         
+            });
             video.saveToFile(output);
         });
     },

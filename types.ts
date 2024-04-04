@@ -14,7 +14,7 @@ interface VideoResizeOpts {
 
 type convert = {
     videoPath: string;
-    audioPath: string;
+    audioPath?: string;
     output: string;
     bitrate: number;
     duration: number;
