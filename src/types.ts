@@ -14,7 +14,7 @@ export interface VideoResizeOpts {
 
 export type convert = {
   videoPath: string;
-  audioPath: string;
+  audioPath?: string;
   output: string;
   bitrate: number;
   duration: number;
