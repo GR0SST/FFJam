@@ -10,6 +10,6 @@ export const LAST_FFMPEG_RELEASE: string =
   'https://github.com/icedterminal/ffmpeg-installer/releases/tag/6.1.1.20240201';
 
 export const SYSTEM_CODEC_CONFIG = {
-  [SupportedOS.Darwin]: { encoder: 'hevc_videotoolbox' },
-  [SupportedOS.Win32]: { encoder: 'hevc_nvenc' },
+  [SupportedOS.Darwin]: { encoder: 'hevc_videotoolbox',options:[] },
+  [SupportedOS.Win32]: { encoder: 'hevc_nvenc',options:['-vf format=yuv420p']},
 } as const;
