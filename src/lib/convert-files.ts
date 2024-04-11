@@ -18,12 +18,12 @@ const convert = async (data: convert) => {
       '-c:a aac',
       '-vtag hvc1',
       '-preset medium',
-      `-maxrate ${bitrate}k`,
-      `-bufsize ${bitrate}k`,
-      `-b:v ${bitrate}k`,
+      `-maxrate ${bitrate * currentEncoder.multilier}k`,
+      `-bufsize ${bitrate * currentEncoder.multilier}k`,
+      `-b:v ${bitrate * currentEncoder.multilier}k`,
       '-y',
     ];
-    options.push(...currentEncoder.options)
+    options.push(...currentEncoder.options);
     audioPath && options.push('-map 1:a:0', '-map 0:v:0');
     video.outputOptions(options);
     video.duration(duration);

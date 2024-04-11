@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "bld" : "./scripts/compile.sh",
-    "dev": "bun run --hot src/main.ts"
+    "dev": "bun run src/main.ts"
   },
   "dependencies": {
     "@types/node": "^20.11.30",
