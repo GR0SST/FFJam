@@ -76,7 +76,7 @@ export const fetchFolder = async (path: string): Promise<VideoProp> => {
         titles[id].sound = `${path}/${audio}`;
         audioList.push(`Appended ${audio} to ${title}_${id}`);
       } else {
-        consola.warn(`WARNING: Creative for ${audio} not found`);
+        consola.warn(`Creative for ${audio} not found`);
       }
     }
 

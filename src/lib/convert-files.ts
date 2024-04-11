@@ -5,14 +5,16 @@ import { currentEncoder } from '../main.ts';
 import type { VideoProp, convert } from '../types.ts';
 import { bitrate } from './bitrate.ts';
 import { clearLastLines } from './clear-last-lines.ts';
+import { file } from 'bun';
+import { renameSync } from 'node:fs';
 
 const convert = async (data: convert) => {
   const { videoPath, audioPath, output, bitrate, duration, update } = data;
   return new Promise((res) => {
     const video = ffmpeg().input(videoPath);
-    video.input(audioPath);
+    audioPath && video.input(audioPath);
     video.videoCodec(currentEncoder.encoder);
-    video.outputOptions([
+    const options = [
       '-c:a aac',
       '-vtag hvc1',
       '-preset medium',
@@ -20,9 +22,9 @@ const convert = async (data: convert) => {
       `-bufsize ${bitrate}k`,
       `-b:v ${bitrate}k`,
       '-y',
-      '-map 1:a:0',
-      '-map 0:v:0',
-    ]);
+    ];
+    audioPath && options.push('-map 1:a:0', '-map 0:v:0');
+    video.outputOptions(options);
     video.duration(duration);
     video.on('error', () => res(false));
     video.on('end', () => res(true));
@@ -34,9 +36,8 @@ const convert = async (data: convert) => {
 
 export const convertFiles = async (outputPath: string, titles: VideoProp) => {
   for (const title of Object.values(titles)) {
-    if (!title.sound) return;
     for (const e of Object.values(title.resize)) {
-      const [_resize, titleName, id, _btn, _loc, duration] = e.args;
+      const [resize, titleName, id, btn, loc, duration] = e.args;
       const titleFolder = `${outputPath}/cream/${titleName}_${id}`;
       await mkdir(titleFolder, { recursive: true });
       const startTime = new Date().getTime();
@@ -48,16 +49,22 @@ export const convertFiles = async (outputPath: string, titles: VideoProp) => {
       );
       bar.start(100, 0);
       const update = (progress: any) => bar.update(Math.round(progress.percent));
+      const output = `${titleFolder}/${e.name}.mp4`;
       await convert({
         videoPath: e.path,
         audioPath: title.sound,
         bitrate: bitrate(duration as unknown as any),
-        output: `${titleFolder}/${e.name}.mp4`,
+        output,
         duration: parseInt(duration),
         update,
       });
       bar.stop();
       clearLastLines(1);
+      const newFileSize = Math.floor(file(output).size / 1000000);
+      renameSync(
+        output,
+        `${titleFolder}/${resize}_${titleName}_${id}_${btn}_${loc}_${duration}_${newFileSize}mb.mp4`,
+      );
       const elapsed = ((new Date().getTime() - startTime) / 1000).toFixed();
       console.log(`${e.name} converted within ${elapsed}s.`);
     }
@@ -68,9 +75,8 @@ export const convertFiles = async (outputPath: string, titles: VideoProp) => {
 export const applovinConvert = async (outputPath: string, titles: VideoProp) => {
   const resizes = ['1920x1080', '1080x1920'];
   for (const title of Object.values(titles)) {
-    if (!title.sound) return;
     for (const e of Object.values(title.resize)) {
-      const [resize, titleName, id, _btn, _loc, duration] = e.args;
+      const [resize, titleName, id, btn, loc, duration] = e.args;
       if (resizes.includes(resize)) {
         const titleFolder = `${outputPath}/applovin/${titleName}_${id}`;
         await mkdir(titleFolder, { recursive: true });
@@ -83,16 +89,22 @@ export const applovinConvert = async (outputPath: string, titles: VideoProp) => 
         );
         bar.start(100, 0);
         const update = (progress: any) => bar.update(Math.round(progress.percent));
+        const output = `${titleFolder}/${e.name}.mp4`;
         await convert({
           videoPath: e.path,
           audioPath: title.sound,
           bitrate: bitrate(duration as any) - 10,
-          output: `${titleFolder}/${e.name}.mp4`,
+          output,
           duration: parseInt(duration),
           update,
         });
         bar.stop();
         clearLastLines(1);
+        const newFileSize = Math.floor(file(output).size / 1000000);
+        renameSync(
+          output,
+          `${titleFolder}/${resize}_${titleName}_${id}_${btn}_${loc}_${duration}_${newFileSize}mb.mp4`,
+        );
         console.log(
           `Applovin variant for ${e.name} created within ${(
             (new Date().getTime() - startTime) /
