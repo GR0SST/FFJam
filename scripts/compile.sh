@@ -1,0 +1,1 @@
+bun build .\src\main.ts --compile --outfile=ffj
