@@ -7,12 +7,30 @@ import { which } from 'bun';
 import colors from "colors";
 import ffmpeg from 'fluent-ffmpeg';
 import os from 'os';
+import readline from 'readline';
 
 const ffmpegPath = which('ffmpeg');
 colors.enable();
+
+const pressEnterKeyTo = ()=> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  console.log("Press Enter to exit");
+  return new Promise(res=>{
+    //@ts-ignore
+    rl.input.on('keypress', () => {
+      rl.close();
+      res(true)
+    });
+})
+}
+
 if (!ffmpegPath) {
   consola.warn(`The ffmpeg is missing, install it from [FFmpeg_Full.msi] ${LAST_FFMPEG_RELEASE}`);
-  exit();
+  await pressEnterKeyTo();
+  exit()
 }
 
 ffmpeg.setFfmpegPath(ffmpegPath);
@@ -24,7 +42,8 @@ const outputPath = path + '/output';
 
 if (!curOS || !Object.keys(SYSTEM_CODEC_CONFIG).includes(curOS)) {
   consola.warn(`Unsupported OS: ${curOS}, Supported OS: ${Object.keys(SupportedOS).join(', ')} `);
-  exit();
+  await  pressEnterKeyTo();
+  exit()
 }
 
 export const currentEncoder = SYSTEM_CODEC_CONFIG[curOS as SupportedOS];
@@ -43,4 +62,7 @@ const bootstrap = async () => {
   console.timeEnd('CONVERTING_APPLOVIN');
 };
 
+
 await bootstrap();
+await pressEnterKeyTo()
+exit()

@@ -94,7 +94,7 @@ export const fetchFolder = async (path: string): Promise<VideoProp> => {
     consola.box(audioList.join('\n'));
 
     Object.values(titles).forEach((item) => {
-      if (!item.sound) console.warn(` Sound for ${item.id} not found`);
+      if (!item.sound) console.warn(`WARNING: Sound for ${item.id} not found`.yellow);
     });
   } catch (error) {
     consola.error('Error occurred while reading folder:', error);
