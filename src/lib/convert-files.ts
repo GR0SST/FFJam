@@ -23,6 +23,7 @@ const convert = async (data: convert) => {
       `-b:v ${bitrate}k`,
       '-y',
     ];
+    options.push(...currentEncoder.options)
     audioPath && options.push('-map 1:a:0', '-map 0:v:0');
     video.outputOptions(options);
     video.duration(duration);

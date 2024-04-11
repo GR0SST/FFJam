@@ -11,17 +11,26 @@ const isIdValid = (id: string): boolean => /\bvideo\d+v\d+\b/.test(id);
 const isNonNumeric = (value: string): boolean => /^[^\d]+$/.test(value);
 const isResizeValid = (resize: string): boolean => /\b\d{3,4}x\d{3,4}\b/.test(resize);
 
-const isNameValid = (args: string[]): boolean => {
+const isNameValid = (args: string[]): any => {
   const [resize, title, id, btn, loc, duration, size] = args;
-  return (
-    isResizeValid(resize) &&
-    isNonNumeric(title) &&
-    isIdValid(id) &&
-    isNonNumeric(btn) &&
-    isNonNumeric(loc) &&
-    isDurationValid(duration) &&
+  const validation =  [
+    isResizeValid(resize),
+    isNonNumeric(title),
+    isIdValid(id),
+    isNonNumeric(btn),
+    isNonNumeric(loc),
+    isDurationValid(duration),
     isSizeValid(size)
-  );
+  ];
+  
+  return {
+    isValid:!validation.some(e=>!e),
+    output:args.map((e,i)=>{
+      if(validation[i])
+        return e 
+      else return e.red
+    }).join("_")
+  }
 };
 
 export const fetchFolder = async (path: string): Promise<VideoProp> => {
@@ -43,9 +52,10 @@ export const fetchFolder = async (path: string): Promise<VideoProp> => {
       const name = video.substring(0, video.lastIndexOf('.')) || video;
       const args = name.toLowerCase().split('_');
       const [resize, _title, id, _btn, loc] = args;
-
-      if (!isNameValid(args)) {
-        consola.warn(`Bad naming ${args.join('_')} - skipping`);
+      const nameCheck = isNameValid(args)
+      
+      if (!nameCheck.isValid) {
+        consola.warn(`Bad naming ${nameCheck.output} - skipping`);
         continue;
       }
 

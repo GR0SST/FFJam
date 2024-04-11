@@ -4,12 +4,12 @@ import { LAST_FFMPEG_RELEASE, SupportedOS, SYSTEM_CODEC_CONFIG } from './lib/con
 import { applovinConvert, convertFiles } from './lib/convert-files.ts';
 import { fetchFolder } from './lib/fetch-folder.ts';
 import { which } from 'bun';
-
+import colors from "colors";
 import ffmpeg from 'fluent-ffmpeg';
 import os from 'os';
 
 const ffmpegPath = which('ffmpeg');
-
+colors.enable();
 if (!ffmpegPath) {
   consola.warn(`The ffmpeg is missing, install it from [FFmpeg_Full.msi] ${LAST_FFMPEG_RELEASE}`);
   exit();
