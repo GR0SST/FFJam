@@ -1,7 +1,7 @@
 import cliProgress from 'cli-progress';
 import ffmpeg from 'fluent-ffmpeg';
 import { mkdir } from 'node:fs/promises';
-import { currentEncoder } from '../main.ts';
+import { SYSTEM_CONFIG } from '../main.ts';
 import type { VideoProp, convert } from '../types.ts';
 import { bitrate, calculateBitrate } from './bitrate.ts';
 import { clearLastLines } from './clear-last-lines.ts';
@@ -13,17 +13,17 @@ const convert = async (data: convert) => {
   return new Promise((res) => {
     const video = ffmpeg().input(videoPath);
     audioPath && video.input(audioPath);
-    video.videoCodec(currentEncoder.encoder);
+    video.videoCodec(SYSTEM_CONFIG.encoder);
     const options = [
       '-c:a aac',
       '-vtag hvc1',
       '-preset medium',
-      `-maxrate ${bitrate * currentEncoder.multilier}k`,
-      `-bufsize ${bitrate * currentEncoder.multilier}k`,
-      `-b:v ${bitrate * currentEncoder.multilier}k`,
+      `-maxrate ${bitrate * SYSTEM_CONFIG.multilier}k`,
+      `-bufsize ${bitrate * SYSTEM_CONFIG.multilier}k`,
+      `-b:v ${bitrate * SYSTEM_CONFIG.multilier}k`,
       '-y',
     ];
-    options.push(...currentEncoder.options);
+    options.push(...SYSTEM_CONFIG.options);
     audioPath && options.push('-map 1:a:0', '-map 0:v:0');
     video.outputOptions(options);
     video.duration(duration);

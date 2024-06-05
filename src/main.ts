@@ -3,25 +3,23 @@ import { exit } from 'process';
 import { LAST_FFMPEG_RELEASE, SupportedOS, SYSTEM_CODEC_CONFIG } from './lib/constants.ts';
 import { applovinConvert, convertFiles } from './lib/convert-files.ts';
 import { fetchFolder } from './lib/fetch-folder.ts';
-import { which } from 'bun';
+import { which, semver } from 'bun';
 import colors from 'colors';
 import ffmpeg from 'fluent-ffmpeg';
 import os from 'os';
 import axios from 'axios';
 import readline from 'readline';
-const meta = {
-  name: "FFjam",
-  version: "1.0.0",
-}
+import meta from '../bin/meta.json';
+
 const ffmpegPath = which('ffmpeg');
 colors.enable();
 
-const pressEnterKeyTo = () => {
+const pressEnterKeyTo = (text: string = 'Press Enter to exit') => {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-  console.log('Press Enter to exit');
+  console.log(text);
   return new Promise((res) => {
     //@ts-ignore
     rl.input.on('keypress', () => {
@@ -51,12 +49,22 @@ if (!curOS || !Object.keys(SYSTEM_CODEC_CONFIG).includes(curOS)) {
   await pressEnterKeyTo();
   exit();
 }
+export const SYSTEM_CONFIG = SYSTEM_CODEC_CONFIG[curOS as SupportedOS];
 
 const checkForUpdate = async () => {
+  const req = await axios.get('https://raw.githubusercontent.com/GR0SST/FFJam/dev/bin/meta.json').catch(e => console.log("Unnable to check for updates"));
+  if (!req?.data) return
 
+  const isUpToDate = semver.satisfies(meta.version, `^${req.data.version}`)
+  if (isUpToDate) return consola.info(`You are up to date! ${meta.name} version: ${meta.version}`)
+
+  consola.warn(`New version available! ${meta.name} version: ${req.data.version}\nDownload link ${SYSTEM_CONFIG.executable}`)
+
+
+  await pressEnterKeyTo("Press Enter to continue");
 }
+await checkForUpdate()
 
-export const currentEncoder = SYSTEM_CODEC_CONFIG[curOS as SupportedOS];
 
 const bootstrap = async () => {
   const folder = await fetchFolder(path);
