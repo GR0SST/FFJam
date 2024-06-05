@@ -3,7 +3,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import { mkdir } from 'node:fs/promises';
 import { currentEncoder } from '../main.ts';
 import type { VideoProp, convert } from '../types.ts';
-import { bitrate } from './bitrate.ts';
+import { bitrate, calculateBitrate } from './bitrate.ts';
 import { clearLastLines } from './clear-last-lines.ts';
 import { file } from 'bun';
 import { renameSync } from 'node:fs';
@@ -94,7 +94,7 @@ export const applovinConvert = async (outputPath: string, titles: VideoProp) => 
         await convert({
           videoPath: e.path,
           audioPath: title.sound,
-          bitrate: bitrate(duration as any) - 10,
+          bitrate: calculateBitrate(duration as any, 50), //bitrate(duration as any) - 10,
           output,
           duration: parseInt(duration),
           update,

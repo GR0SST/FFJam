@@ -7,8 +7,12 @@ import { which } from 'bun';
 import colors from 'colors';
 import ffmpeg from 'fluent-ffmpeg';
 import os from 'os';
+import axios from 'axios';
 import readline from 'readline';
-
+const meta = {
+  name: "FFjam",
+  version: "1.0.0",
+}
 const ffmpegPath = which('ffmpeg');
 colors.enable();
 
@@ -33,17 +37,23 @@ if (!ffmpegPath) {
   exit();
 }
 
+
+
 ffmpeg.setFfmpegPath(ffmpegPath);
 consola.info('ffmpeg path:', ffmpegPath);
 
 const curOS = os.platform();
-const path = process.cwd(); //+ '/test';
+const path = process.cwd() + '/test';
 const outputPath = path + '/output';
 
 if (!curOS || !Object.keys(SYSTEM_CODEC_CONFIG).includes(curOS)) {
   consola.warn(`Unsupported OS: ${curOS}, Supported OS: ${Object.keys(SupportedOS).join(', ')} `);
   await pressEnterKeyTo();
   exit();
+}
+
+const checkForUpdate = async () => {
+
 }
 
 export const currentEncoder = SYSTEM_CODEC_CONFIG[curOS as SupportedOS];

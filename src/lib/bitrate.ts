@@ -5,6 +5,10 @@ export const mbs = {
   '60s': 12000,
 } as const;
 
+export const calculateBitrate = (duration: number, maxWeight: number) => {
+  return ((duration / maxWeight) * 8) * 1000;
+}
+
 export const bitrate = (dur: keyof typeof mbs) => {
   return mbs[dur] || mbs['45s'];
 };

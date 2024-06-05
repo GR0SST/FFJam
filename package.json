@@ -3,11 +3,12 @@
   "module": "src/main.ts",
   "type": "module",
   "scripts": {
-    "bld" : "./scripts/compile.sh",
-    "dev": "bun run /src/main.ts"
+    "bld": "./scripts/compile.sh",
+    "dev": "bun run ./src/main.ts"
   },
   "dependencies": {
     "@types/node": "^20.11.30",
+    "axios": "^1.7.2",
     "cli-progress": "^3.12.0",
     "colors": "^1.4.0",
     "consola": "^3.2.3",
