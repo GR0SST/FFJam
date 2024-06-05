@@ -91,16 +91,19 @@ export const applovinConvert = async (outputPath: string, titles: VideoProp) => 
         bar.start(100, 0);
         const update = (progress: any) => bar.update(Math.round(progress.percent));
         const output = `${titleFolder}/${e.name}.mp4`;
+
+
         await convert({
           videoPath: e.path,
           audioPath: title.sound,
-          bitrate: calculateBitrate(duration as any, 50), //bitrate(duration as any) - 10,
+          bitrate: calculateBitrate(parseInt(duration as any), 50),
           output,
           duration: parseInt(duration),
           update,
         });
         bar.stop();
         clearLastLines(1);
+
         const newFileSize = Math.floor(file(output).size / 1000000);
         renameSync(
           output,

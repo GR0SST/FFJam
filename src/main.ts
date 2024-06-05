@@ -41,7 +41,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 consola.info('ffmpeg path:', ffmpegPath);
 
 const curOS = os.platform();
-const path = process.cwd() + '/test';
+const path = process.cwd() // + '/test';
 const outputPath = path + '/output';
 
 if (!curOS || !Object.keys(SYSTEM_CODEC_CONFIG).includes(curOS)) {
