@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "bld": "./scripts/compile.sh",
-    "dev": "bun run ./src/main.ts"
+    "dev": "bun run ./src/main.ts",
+    "bin": "./bin/ffj"
   },
   "dependencies": {
     "@types/node": "^20.11.30",
