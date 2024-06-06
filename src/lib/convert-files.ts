@@ -96,7 +96,7 @@ export const applovinConvert = async (outputPath: string, titles: VideoProp) => 
         await convert({
           videoPath: e.path,
           audioPath: title.sound,
-          bitrate: calculateBitrate(parseInt(duration as any), 50),
+          bitrate: calculateBitrate(parseInt(duration as any), 50) - 10,
           output,
           duration: parseInt(duration),
           update,
