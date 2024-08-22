@@ -1,6 +1,6 @@
 export const calculateBitrate = (duration: number, maxWeight: number) => {
-  return Math.floor((((maxWeight * 0.9) / duration) * 8) * 1000);
-}
+  return Math.floor(((maxWeight * 0.9) / duration) * 8 * 1000);
+};
 
 export const mbs = {
   '30s': calculateBitrate(30, 50),

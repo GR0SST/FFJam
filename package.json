@@ -3,17 +3,21 @@
   "module": "src/main.ts",
   "type": "module",
   "scripts": {
+    "pritify": "prettier.bunx ./src",
     "build": "./scripts/compile.sh",
-    "dev": "bun run ./src/main.ts",
+    "dev": "NODE_ENV=development bun run ./src/main.ts",
     "bin": "./bin/ffj"
   },
   "dependencies": {
+    "@clack/core": "^0.3.4",
+    "@clack/prompts": "^0.7.0",
     "@types/node": "^20.11.30",
     "axios": "^1.7.2",
     "cli-progress": "^3.12.0",
     "colors": "^1.4.0",
     "consola": "^3.2.3",
-    "fluent-ffmpeg": "^2.1.2"
+    "fluent-ffmpeg": "^2.1.2",
+    "picocolors": "^1.0.1"
   },
   "devDependencies": {
     "@types/bun": "^1.0.10",
