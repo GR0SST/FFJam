@@ -1,7 +1,9 @@
 import { readdir } from 'node:fs/promises';
+import color from 'picocolors';
 import { SUPPORTED_AUDIO_FORMATS, SUPPORTED_VIDEO_FORMATS } from './constants.ts';
 import { consola } from 'consola';
 import type { VideoProp } from '../types.ts';
+import * as p from '@clack/prompts';
 
 import { centerAlign } from 'consola/utils';
 
@@ -13,24 +15,25 @@ const isResizeValid = (resize: string): boolean => /\b\d{3,4}x\d{3,4}\b/.test(re
 
 const isNameValid = (args: string[]): any => {
   const [resize, title, id, btn, loc, duration, size] = args;
-  const validation =  [
+  const validation = [
     isResizeValid(resize),
     isNonNumeric(title),
     isIdValid(id),
     isNonNumeric(btn),
     isNonNumeric(loc),
     isDurationValid(duration),
-    isSizeValid(size)
+    isSizeValid(size),
   ];
-  
+
   return {
-    isValid:!validation.some(e=>!e),
-    output:args.map((e,i)=>{
-      if(validation[i])
-        return e 
-      else return e.red
-    }).join("_")
-  }
+    isValid: validation.some(Boolean),
+    output: args
+      .map((e, i) => {
+        if (validation[i]) return e;
+        else return color.red(e);
+      })
+      .join('_'),
+  };
 };
 
 export const fetchFolder = async (path: string): Promise<VideoProp> => {
@@ -52,15 +55,15 @@ export const fetchFolder = async (path: string): Promise<VideoProp> => {
       const name = video.substring(0, video.lastIndexOf('.')) || video;
       const args = name.toLowerCase().split('_');
       const [resize, _title, id, _btn, loc] = args;
-      const nameCheck = isNameValid(args)
-      
+      const nameCheck = isNameValid(args);
+
       if (!nameCheck.isValid) {
-        consola.warn(`Bad naming ${nameCheck.output} - skipping`);
+        p.note(`Bad naming ${nameCheck.output} - skipping`);
         continue;
       }
 
       if (titles[id]?.resize[resize] && titles[id].resize[resize].args[4] === loc) {
-        consola.warn(`Duplicates found ${video} and ${titles[id].resize[resize].name}`);
+        p.note(`Duplicates found ${video} and ${titles[id].resize[resize].name}`);
         continue;
       }
 
@@ -75,7 +78,7 @@ export const fetchFolder = async (path: string): Promise<VideoProp> => {
       addedList.push(`Added ${name}`);
     }
 
-    consola.box(addedList.join('\n'));
+    p.note(addedList.join('\n'));
 
     const audioList: string[] = [];
 
@@ -86,18 +89,17 @@ export const fetchFolder = async (path: string): Promise<VideoProp> => {
         titles[id].sound = `${path}/${audio}`;
         audioList.push(`Appended ${audio} to ${title}_${id}`);
       } else {
-        consola.warn(`Creative for ${audio} not found`);
+        p.note(`Creative for ${audio} not found`);
       }
     }
 
-    consola.log(centerAlign('AUDIO', 35));
-    consola.box(audioList.join('\n'));
+    p.note(audioList.join('\n'));
 
     Object.values(titles).forEach((item) => {
-      if (!item.sound) console.warn(`WARNING: Sound for ${item.id} not found`.yellow);
+      if (!item.sound) p.note(`WARNING: Sound for ${item.id} not found`);
     });
   } catch (error) {
-    consola.error('Error occurred while reading folder:', error);
+    p.note('Error occurred while reading folder');
   }
 
   return titles;

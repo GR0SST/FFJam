@@ -18,5 +18,4 @@ export type convert = {
   output: string;
   bitrate: number;
   duration: number;
-  update: Function;
 };
