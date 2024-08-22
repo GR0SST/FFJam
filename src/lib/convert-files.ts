@@ -1,11 +1,9 @@
-import cliProgress from 'cli-progress';
 import ffmpeg from 'fluent-ffmpeg';
 import { renameSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { SYSTEM_CONFIG } from '../main.ts';
 import type { VideoProp, convert } from '../types.ts';
-import { bitrate, calculateBitrate } from './bitrate.ts';
-import { clearLastLines } from './clear-last-lines.ts';
+import { bitrate } from './bitrate.ts';
 import { file } from 'bun';
 import * as p from '@clack/prompts';
 
@@ -53,7 +51,6 @@ export const convertFiles = async (outputPath: string, titles: VideoProp) => {
         output,
         duration: parseInt(duration),
       });
-      clearLastLines(1);
       const newFileSize = Math.floor(file(output).size / 1000000);
       renameSync(
         output,
