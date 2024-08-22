@@ -29,7 +29,7 @@ async function main() {
     {
       checkForUpdate: async () => {
         const response = await fetch(
-          'https://raw.githubusercontent.com/GR0SST/FFJam/dev/bin/meta.json',
+          'https://raw.githubusercontent.com/GR0SST/FFJam/main/bin/meta.json',
         );
 
         if (!response.ok) {
