@@ -73,11 +73,11 @@ const bootstrap = async () => {
   await convertFiles(outputPath, folder);
   console.timeEnd('CONVERTING_FILES');
   consola.log('------------------------------\n\n');
-  consola.log('-------------APPLOVIN-------------');
-  console.time('CONVERTING_APPLOVIN');
-  await applovinConvert(outputPath, folder);
-  consola.log('------------------------------\n\n');
-  console.timeEnd('CONVERTING_APPLOVIN');
+  // consola.log('-------------APPLOVIN-------------');
+  // console.time('CONVERTING_APPLOVIN');
+  // await applovinConvert(outputPath, folder);
+  // consola.log('------------------------------\n\n');
+  // console.timeEnd('CONVERTING_APPLOVIN');
 };
 
 await bootstrap();
